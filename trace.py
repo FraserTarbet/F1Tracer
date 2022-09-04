@@ -5,11 +5,17 @@ class AnimationManager():
     def __init__(self):
         self.traces = []
         self.cumulative_dt = 0
+        self.ended_traces = []
 
     def update_traces(self, dt):
         self.cumulative_dt += dt
         for trace in self.traces:
             trace.update_position(self.cumulative_dt)
+        for trace in self.ended_traces:
+            if trace in self.traces:
+                self.traces.remove(trace)
+            if len(self.traces) == 0:
+                pyglet.app.exit()
 
 
 class Trace(pyglet.shapes.Circle):
@@ -28,6 +34,11 @@ class Trace(pyglet.shapes.Circle):
         # Increment index if needed
         if cumulative_dt >= self.time_tuple[self.index + 1]:
             self.index += 1
+            # End trace when out of samples
+            if self.index + 1 >= len(self.time_tuple):
+                self.animation_manager.ended_traces.append(self)
+                self.visible = False
+                return
 
         # Interpolate X & Y coords based on where cumulative dt falls between samples
         prev_time = self.time_tuple[self.index]
