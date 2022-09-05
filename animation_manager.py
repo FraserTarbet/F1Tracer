@@ -5,6 +5,7 @@ class AnimationManager():
     def __init__(self, window):
         self.window = window
         self.traces = []
+        self.racing_line = None
         self.cumulative_dt = 0
         self.ended_traces = []
         self.tracked_traces = []
@@ -63,6 +64,9 @@ class AnimationManager():
                 self.traces.remove(trace)
             if len(self.traces) == 0:
                 pyglet.app.exit()
+
+        if self.racing_line is not None:
+            self.racing_line.update_position(self.cumulative_dt)
 
 
     def fit_to_viewport(self, world_x, world_y):

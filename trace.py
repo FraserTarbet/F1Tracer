@@ -64,6 +64,7 @@ class RacingLine():
 class RollingRacingLine():
     def __init__(self, batch, group, width, color, frame, rolling_samples, animation_manager):
         self.animation_manager = animation_manager
+        self.animation_manager.racing_line = self
         self.time_tuple = tuple(frame["AnimTime"])
         self.x_tuple = tuple(frame["X"])
         self.y_tuple = tuple(frame["Y"])
@@ -71,6 +72,7 @@ class RollingRacingLine():
         self.rolling_samples = rolling_samples
 
         self.lines = []
+        self.line_world_positions = []
         for i in range(rolling_samples):
             new_line = pyglet.shapes.Line(
                 x=0,
@@ -83,11 +85,32 @@ class RollingRacingLine():
                 group=group
             )
             self.lines.append(new_line)
+            self.line_world_positions.append((0, 0, 0, 0))
 
-        for i in range(rolling_samples / 2):
-            line = self.lines.pop(0)
-            line.position = (self.x_tuple[i], self.y_tuple[i], self.x_tuple[i+1], self.y_tuple[i+1])
-            self.lines.append(line)
+        for i in range(int(rolling_samples / 2)):
+            line_world_position = self.line_world_positions.pop(0)
+            line_world_position = (self.x_tuple[i], self.y_tuple[i], self.x_tuple[i+1], self.y_tuple[i+1])
+            self.line_world_positions.append(line_world_position)
             self.index += 1
+
+
+    def update_position(self, cumulative_dt):
+        # Roll through lines
+        # Increment index if needed
+        if cumulative_dt >= self.time_tuple[self.index - int(self.rolling_samples / 2)]:
+            # End rolling when out of samples, but don't stop repositioning existing lines
+            if self.index + 1 >= len(self.time_tuple):
+                pass
+            else:
+                line_world_position = self.line_world_positions.pop(0)
+                line_world_position = (self.x_tuple[self.index], self.y_tuple[self.index], self.x_tuple[self.index+1], self.y_tuple[self.index+1])
+                self.line_world_positions.append(line_world_position)
+                self.index += 1
+
+        # Adjust all lines to viewport
+        for i, line in enumerate(self.lines):
+            coords_1 = self.animation_manager.fit_to_viewport(self.line_world_positions[i][0], self.line_world_positions[i][1])
+            coords_2 = self.animation_manager.fit_to_viewport(self.line_world_positions[i][2], self.line_world_positions[i][3])
+            line.position = (coords_1[0], coords_1[1], coords_2[0], coords_2[1])
 
         
