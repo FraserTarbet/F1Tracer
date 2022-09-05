@@ -6,7 +6,7 @@ def hex_to_rgb(hex_string):
 
 
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, frame, animation_manager):
+    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None):
         super().__init__(200, 200, radius, batch=batch, group=group)
         self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
@@ -16,6 +16,13 @@ class Trace(pyglet.shapes.Circle):
         self.animation_manager = animation_manager
         self.world_position = (0, 0)
         self.animation_manager.traces.append(self)
+        if tracking_window is not None:
+            self.use_tracking_window = True
+            self.tracking_window = tracking_window
+            self.trackable = False
+        else:
+            self.use_tracking_window = False
+            self.trackable = True
 
     def restart(self):
         self.index = 0
@@ -31,6 +38,10 @@ class Trace(pyglet.shapes.Circle):
                 self.animation_manager.ended_traces.append(self)
                 self.visible = False
                 return
+
+        # Update tracking variable if used
+        if self.use_tracking_window:
+            self.trackable = self.tracking_window[0] <= cumulative_dt <= self.tracking_window[1]
 
         # Interpolate X & Y coords based on where cumulative dt falls between samples
         prev_time = self.time_tuple[self.index]

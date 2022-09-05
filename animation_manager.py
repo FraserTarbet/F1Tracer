@@ -50,12 +50,18 @@ class AnimationManager():
 
         tracked_count = len(self.tracked_traces)
         if tracked_count == 1:
-            self.view_centre = self.tracked_traces[0].world_position
+            if self.tracked_traces[0].trackable:
+                self.view_centre = self.tracked_traces[0].world_position
+            else:
+                self.view_centre = self.start_finish_point.world_point
         elif tracked_count > 1:
             x_sum = 0
             y_sum = 0
             for trace in self.tracked_traces:
-                x, y = trace.world_position
+                if trace.trackable:
+                    x, y = trace.world_position
+                else:
+                    x, y = self.start_finish_point.world_point
                 x_sum += x
                 y_sum += y
             self.view_centre = (x_sum / tracked_count, y_sum / tracked_count)
