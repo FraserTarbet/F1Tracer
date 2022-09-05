@@ -1,34 +1,16 @@
 import pyglet
 
 
-class AnimationManager():
-    def __init__(self):
-        self.traces = []
-        self.cumulative_dt = 0
-        self.ended_traces = []
-
-    def update_traces(self, dt):
-        self.cumulative_dt += dt
-        for trace in self.traces:
-            trace.update_position(self.cumulative_dt)
-        for trace in self.ended_traces:
-            if trace in self.traces:
-                self.traces.remove(trace)
-            if len(self.traces) == 0:
-                pyglet.app.exit()
-
-
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, radius, color, frame, animation_manager=None):
-        x, y = frame[["X_fit", "Y_fit"]].iloc[0]
-        super().__init__(200, 200, radius, color=color, batch=batch)
+    def __init__(self, batch, group, radius, color, frame, animation_manager):
+        super().__init__(200, 200, radius, color=color, batch=batch, group=group)
         self.time_tuple = tuple(frame["AnimTime"])
-        self.x_tuple = tuple(frame["X_fit"])
-        self.y_tuple = tuple(frame["Y_fit"])
+        self.x_tuple = tuple(frame["X"])
+        self.y_tuple = tuple(frame["Y"])
         self.index = 0
         self.animation_manager = animation_manager
-        if self.animation_manager is not None:
-            self.animation_manager.traces.append(self)
+        self.world_position = (0, 0)
+        self.animation_manager.traces.append(self)
 
     def update_position(self, cumulative_dt):
         # Increment index if needed
@@ -55,14 +37,17 @@ class Trace(pyglet.shapes.Circle):
         # interp_x = prev_x
         # interp_y = prev_y
 
-        self.position = (interp_x, interp_y)
+        # Adjust to viewport
+        self.world_position = (interp_x, interp_y)
+        fit_to_viewport = self.animation_manager.fit_to_viewport(interp_x, interp_y)
+        self.position = fit_to_viewport
 
 
 class RacingLine():
     def __init__(self, batch, width, color, frame):
         self.lines = []
-        x_tuple = tuple(frame["X_fit"])
-        y_tuple = tuple(frame["Y_fit"])
+        x_tuple = tuple(frame["X"])
+        y_tuple = tuple(frame["Y"])
         for i in range(len(x_tuple) - 1):
             line = pyglet.shapes.Line(
                 x=x_tuple[i], 
@@ -74,3 +59,35 @@ class RacingLine():
                 batch=batch
             )
             self.lines.append(line)
+
+
+class RollingRacingLine():
+    def __init__(self, batch, group, width, color, frame, rolling_samples, animation_manager):
+        self.animation_manager = animation_manager
+        self.time_tuple = tuple(frame["AnimTime"])
+        self.x_tuple = tuple(frame["X"])
+        self.y_tuple = tuple(frame["Y"])
+        self.index = 0
+        self.rolling_samples = rolling_samples
+
+        self.lines = []
+        for i in range(rolling_samples):
+            new_line = pyglet.shapes.Line(
+                x=0,
+                y=0,
+                x2=0,
+                y2=0,
+                width=width,
+                color=color,
+                batch=batch,
+                group=group
+            )
+            self.lines.append(new_line)
+
+        for i in range(rolling_samples / 2):
+            line = self.lines.pop(0)
+            line.position = (self.x_tuple[i], self.y_tuple[i], self.x_tuple[i+1], self.y_tuple[i+1])
+            self.lines.append(line)
+            self.index += 1
+
+        
