@@ -37,7 +37,7 @@ radii = [
 traces = []
 for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smooth]):
     frame = data_functions.add_animation_time(frame)
-    traces.append(trace.Trace(batch, foreground, radii[i], colors[i], frame, animation_manager))
+    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager))
 
 animation_manager.tracked_traces = [traces[1], traces[3]]
 

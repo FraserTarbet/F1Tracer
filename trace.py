@@ -1,9 +1,14 @@
 import pyglet
 
 
+def hex_to_rgb(hex_string):
+    return tuple(int(hex_string[i:i+2], 16) for i in (0, 2, 4))
+
+
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, color, frame, animation_manager):
-        super().__init__(200, 200, radius, color=color, batch=batch, group=group)
+    def __init__(self, batch, group, radius, frame, animation_manager):
+        super().__init__(200, 200, radius, batch=batch, group=group)
+        self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
         self.x_tuple = tuple(frame["X"])
         self.y_tuple = tuple(frame["Y"])
