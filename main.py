@@ -14,9 +14,9 @@ foreground = pyglet.graphics.OrderedGroup(2)
 static_batch = pyglet.graphics.Batch()
 animation_manager = animation_manager.AnimationManager(window)
 
-ver_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 1, 8)
+ver_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 1, 8, 3)
 ver_frame_smooth = data_functions.sample_smoothing(ver_frame.copy())
-sai_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 55, 10)
+sai_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 55, 10, 3)
 sai_frame_smooth = data_functions.sample_smoothing(sai_frame.copy())
 
 racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
@@ -51,4 +51,5 @@ def on_draw():
 
 
 if __name__ == "__main__":
+    animation_manager.run()
     pyglet.app.run()

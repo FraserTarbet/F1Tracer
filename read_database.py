@@ -14,7 +14,7 @@ def get_sqlalchemy_engine():
     return engine
 
 
-def read_lap_samples(session_date, session_name, driver_number, lap_number):
+def read_lap_samples(session_date, session_name, driver_number, lap_number, buffer_seconds=0):
     sqlalchemy_engine = get_sqlalchemy_engine()
     sql_query = f"""
         SET NOCOUNT ON;
@@ -23,7 +23,8 @@ def read_lap_samples(session_date, session_name, driver_number, lap_number):
             @SessionDate = '{session_date}',
             @SessionName = '{session_name}',
             @DriverNumber = {driver_number},
-            @LapNumber = {lap_number}
+            @LapNumber = {lap_number},
+            @BufferSeconds = {buffer_seconds}
     """
     frame = pd.read_sql_query(sql_query, sqlalchemy_engine)
     sqlalchemy_engine.dispose()

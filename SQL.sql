@@ -15,6 +15,9 @@ BEGIN
 		,@LapEndTime FLOAT
 		,@Tla VARCHAR(3)
 		,@TeamColour VARCHAR(6)
+		,@BufferTime FLOAT
+
+	SET @BufferTime = CAST(@BufferSeconds AS FLOAT) * 1000000000
 
 
 	-- Identify lap parameters
@@ -57,8 +60,8 @@ BEGIN
 
 	WHERE SessionId = @SessionId
 	AND Driver = @DriverNumber
-	AND [Time] >= @LapStartTime - @BufferSeconds * 1000000000
-	AND [Time] <= @LapEndTime + @BufferSeconds * 1000000000
+	AND [Time] >= @LapStartTime - @BufferTime
+	AND [Time] <= @LapEndTime + @BufferTime
 
 END
 GO

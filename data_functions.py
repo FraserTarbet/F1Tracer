@@ -1,8 +1,9 @@
 from scipy.signal import savgol_filter
 
 def add_animation_time(frame):
-    first_sample_time = frame["Time"].min()
-    frame["AnimTime"] = frame["Time"].apply(lambda x: (x - first_sample_time)/1000000000)
+    #first_sample_time = frame["Time"].min()
+    start_time = frame["LapStartTime"].iloc[0]
+    frame["AnimTime"] = frame["Time"].apply(lambda x: (x - start_time)/1000000000)
 
     return frame
 

@@ -13,6 +13,9 @@ class AnimationManager():
         self.view_scale = 1000
         self.view_border = 60
 
+    def run(self):
+        self.start()
+
     def update_traces(self, dt):
         self.cumulative_dt += dt
 
@@ -64,7 +67,7 @@ class AnimationManager():
                 self.traces.remove(trace)
             if len(self.traces) == 0:
                 #pyglet.app.exit()
-                self.restart()
+                self.start()
                 return
 
         if self.racing_line is not None:
@@ -79,12 +82,14 @@ class AnimationManager():
 
         return coords
 
-
-    def restart(self):
-        self.cumulative_dt = 0
-
+    def start(self):
         for trace in self.ended_traces:
             trace.restart()
         self.ended_traces.clear()
+
+        animation_starts = []
+        for trace in self.traces:
+            animation_starts.append(min(trace.time_tuple))
+        self.cumulative_dt = min(animation_starts)
 
         self.racing_line.start()
