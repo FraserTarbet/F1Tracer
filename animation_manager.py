@@ -14,6 +14,7 @@ class AnimationManager():
         self.view_centre = None
         self.view_scale = 1000
         self.view_border = 60
+        self.minimap = None
 
     def run(self):
         self.start()
@@ -83,6 +84,9 @@ class AnimationManager():
 
         if self.start_finish_point is not None:
             self.start_finish_point.update_position()
+
+        if self.minimap is not None:
+            self.minimap.update_position()
 
 
     def fit_to_viewport(self, world_x, world_y):

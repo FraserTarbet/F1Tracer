@@ -6,7 +6,7 @@ def hex_to_rgb(hex_string):
 
 
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None):
+    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla = False):
         super().__init__(200, 200, radius, batch=batch, group=group)
         self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
@@ -23,6 +23,10 @@ class Trace(pyglet.shapes.Circle):
         else:
             self.use_tracking_window = False
             self.trackable = True
+        if tla:
+            self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group)
+        else:
+            self.tla = None
 
     def restart(self):
         self.index = 0
@@ -62,6 +66,10 @@ class Trace(pyglet.shapes.Circle):
         self.world_position = (interp_x, interp_y)
         fit_to_viewport = self.animation_manager.fit_to_viewport(interp_x, interp_y)
         self.position = fit_to_viewport
+
+        # Adjust any label
+        if self.tla is not None:
+            self.tla.update_position()
 
 
 class RacingLine():
@@ -156,3 +164,13 @@ class StartFinishPoint():
 
     def update_position(self):
         self.point.position = self.animation_manager.fit_to_viewport(self.world_point[0], self.world_point[1])
+
+
+class TraceLabel(pyglet.text.Label):
+    def __init__(self, parent_trace, text, color, offset, batch=None, group=None):
+        super().__init__(text=text, font_name="TitilliumWeb-Regular", font_size=10, bold=True, color=color, batch=batch, group=group)
+        self.parent_trace = parent_trace
+        self.offset = offset
+
+    def update_position(self):
+        self.position = (self.parent_trace.position[0] + self.offset[0], self.parent_trace.position[1] + self.offset[1])
