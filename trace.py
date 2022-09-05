@@ -136,3 +136,12 @@ class RollingRacingLine():
             line.position = (coords_1[0], coords_1[1], coords_2[0], coords_2[1])
 
         
+class StartFinishPoint():
+    def __init__(self, world_point, radius, color, batch, group, animation_manager):
+        self.animation_manager = animation_manager
+        self.animation_manager.start_finish_point = self
+        self.world_point = world_point
+        self.point = pyglet.shapes.Circle(0, 0, radius, color=color, batch=batch, group=group)
+
+    def update_position(self):
+        self.point.position = self.animation_manager.fit_to_viewport(self.world_point[0], self.world_point[1])

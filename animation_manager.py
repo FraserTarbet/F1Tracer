@@ -2,10 +2,12 @@ import pyglet
 
 
 class AnimationManager():
-    def __init__(self, window):
+    def __init__(self, window, track_to_start_finish=False):
         self.window = window
         self.traces = []
         self.racing_line = None
+        self.start_finish_point = None
+        self.track_to_start_finish = track_to_start_finish
         self.cumulative_dt = 0
         self.ended_traces = []
         self.tracked_traces = []
@@ -72,6 +74,9 @@ class AnimationManager():
 
         if self.racing_line is not None:
             self.racing_line.update_position(self.cumulative_dt)
+
+        if self.start_finish_point is not None:
+            self.start_finish_point.update_position()
 
 
     def fit_to_viewport(self, world_x, world_y):

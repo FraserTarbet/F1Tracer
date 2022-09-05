@@ -22,6 +22,9 @@ sai_frame_smooth = data_functions.sample_smoothing(sai_frame.copy())
 racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
 racing_line_trace = trace.RollingRacingLine(batch, midground, 3, (21, 21, 30), racing_line_frame, 50, animation_manager)
 
+start_finish_point = data_functions.make_start_finish_point(ver_frame.copy())
+start_finish_trace = trace.StartFinishPoint(start_finish_point, 8, (0, 0, 0), batch, midground, animation_manager)
+
 radii = [
     5,
     10,
