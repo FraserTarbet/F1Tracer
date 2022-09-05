@@ -63,7 +63,9 @@ class AnimationManager():
             if trace in self.traces:
                 self.traces.remove(trace)
             if len(self.traces) == 0:
-                pyglet.app.exit()
+                #pyglet.app.exit()
+                self.restart()
+                return
 
         if self.racing_line is not None:
             self.racing_line.update_position(self.cumulative_dt)
@@ -76,3 +78,13 @@ class AnimationManager():
             coords[i] = (coords[i] * (self.window.width / self.view_scale) + self.window.width / 2)
 
         return coords
+
+
+    def restart(self):
+        self.cumulative_dt = 0
+
+        for trace in self.ended_traces:
+            trace.restart()
+        self.ended_traces.clear()
+
+        self.racing_line.start()

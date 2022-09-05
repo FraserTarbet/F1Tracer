@@ -22,12 +22,6 @@ sai_frame_smooth = data_functions.sample_smoothing(sai_frame.copy())
 racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
 racing_line_trace = trace.RollingRacingLine(batch, midground, 3, (21, 21, 30), racing_line_frame, 50, animation_manager)
 
-colors = [
-    (0, 0, 255),
-    (0, 0, 255),
-    (255, 0, 0),
-    (255, 0, 0)
-    ]
 radii = [
     5,
     10,

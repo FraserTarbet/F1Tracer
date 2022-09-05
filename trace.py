@@ -17,6 +17,11 @@ class Trace(pyglet.shapes.Circle):
         self.world_position = (0, 0)
         self.animation_manager.traces.append(self)
 
+    def restart(self):
+        self.index = 0
+        self.visible = True
+        self.animation_manager.traces.append(self)
+
     def update_position(self, cumulative_dt):
         # Increment index if needed
         if cumulative_dt >= self.time_tuple[self.index + 1]:
@@ -75,24 +80,36 @@ class RollingRacingLine():
         self.y_tuple = tuple(frame["Y"])
         self.index = 0
         self.rolling_samples = rolling_samples
+        self.width = width
+        self.color = color
+        self.batch = batch
+        self.group = group
 
         self.lines = []
         self.line_world_positions = []
-        for i in range(rolling_samples):
+
+        self.start()
+
+
+    def start(self):
+        self.index = 0
+        self.lines = []
+        self.line_world_positions = []
+        for i in range(self.rolling_samples):
             new_line = pyglet.shapes.Line(
                 x=0,
                 y=0,
                 x2=0,
                 y2=0,
-                width=width,
-                color=color,
-                batch=batch,
-                group=group
+                width=self.width,
+                color=self.color,
+                batch=self.batch,
+                group=self.group
             )
             self.lines.append(new_line)
             self.line_world_positions.append((0, 0, 0, 0))
 
-        for i in range(int(rolling_samples / 2)):
+        for i in range(int(self.rolling_samples / 2)):
             line_world_position = self.line_world_positions.pop(0)
             line_world_position = (self.x_tuple[i], self.y_tuple[i], self.x_tuple[i+1], self.y_tuple[i+1])
             self.line_world_positions.append(line_world_position)
