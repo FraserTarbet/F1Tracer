@@ -6,7 +6,7 @@ def hex_to_rgb(hex_string):
 
 
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla = False):
+    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla = False, tcam = False):
         super().__init__(200, 200, radius, batch=batch, group=group)
         self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
@@ -27,6 +27,10 @@ class Trace(pyglet.shapes.Circle):
             self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group)
         else:
             self.tla = None
+        if tcam:
+            self.tcam = pyglet.shapes.Circle(0, 0, radius/2, color=(255, 255, 0), batch=batch, group=group)
+        else:
+            self.tcam = None
 
     def restart(self):
         self.index = 0
@@ -70,6 +74,10 @@ class Trace(pyglet.shapes.Circle):
         # Adjust any label
         if self.tla is not None:
             self.tla.update_position()
+
+        # Adjust any T-cam
+        if self.tcam is not None:
+            self.tcam.position = self.position
 
 
 class RacingLine():

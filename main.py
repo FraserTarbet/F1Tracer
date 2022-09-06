@@ -56,11 +56,21 @@ tla = [
     False,
     True
 ]
+tcam = [
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    False,
+    True
+]
 traces = []
 for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smooth, oco_frame, oco_frame_smooth, ham_frame, ham_frame_smooth]):
     frame = data_functions.add_animation_time(frame)
     tracking_window = data_functions.get_tracking_window(frame)
-    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i]))
+    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i]))
 
 animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
 
