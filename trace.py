@@ -6,8 +6,9 @@ def hex_to_rgb(hex_string):
 
 
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla=False, tcam=False, tail=False):
-        super().__init__(200, 200, radius, batch=batch, group=group)
+    def __init__(self, batch, group_dict, radius, frame, animation_manager, tracking_window=None, tla=False, tcam=False, tail=False):
+        super().__init__(200, 200, radius, batch=batch, group=group_dict["foreground"])
+        self.group_dict = group_dict
         self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
         self.x_tuple = tuple(frame["X"])
@@ -27,10 +28,10 @@ class Trace(pyglet.shapes.Circle):
 
         self.tla = tla
         if tla:
-            self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group)
+            self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group_dict["overlay"])
 
         if tcam:
-            self.tcam = pyglet.shapes.Circle(0, 0, radius/2, color=(255, 255, 0), batch=batch, group=group)
+            self.tcam = pyglet.shapes.Circle(0, 0, radius/2, color=(255, 255, 0), batch=batch, group=group_dict["overlay"])
         else:
             self.tcam = None
 
@@ -79,7 +80,7 @@ class Trace(pyglet.shapes.Circle):
             if self.tail_last_point is None:
                 self.tail_last_point = self.world_position
                 self.tail_last_dt = cumulative_dt
-            elif cumulative_dt - self.tail_last_dt > 0.1:
+            elif cumulative_dt - self.tail_last_dt > 1/30:
                 tail_section = TailSection(
                     self.tail_last_point[0], 
                     self.tail_last_point[1], 
@@ -88,7 +89,7 @@ class Trace(pyglet.shapes.Circle):
                     self.radius,
                     self.color,
                     self._batch,
-                    self._group,
+                    self.group_dict["midground"],
                     self.animation_manager,
                     cumulative_dt
                 )
@@ -109,26 +110,8 @@ class Trace(pyglet.shapes.Circle):
             self.tcam.position = self.position
 
 
-class RacingLine():
-    def __init__(self, batch, width, color, frame):
-        self.lines = []
-        x_tuple = tuple(frame["X"])
-        y_tuple = tuple(frame["Y"])
-        for i in range(len(x_tuple) - 1):
-            line = pyglet.shapes.Line(
-                x=x_tuple[i], 
-                y=y_tuple[i], 
-                x2=x_tuple[i+1],             
-                y2=y_tuple[i+1],
-                width=width,
-                color=color,
-                batch=batch
-            )
-            self.lines.append(line)
-
-
 class RollingRacingLine():
-    def __init__(self, batch, group, width, color, frame, rolling_samples, animation_manager):
+    def __init__(self, batch, group_dict, width, frame, rolling_samples, animation_manager):
         self.animation_manager = animation_manager
         self.animation_manager.racing_line = self
         self.time_tuple = tuple(frame["AnimTime"])
@@ -137,9 +120,9 @@ class RollingRacingLine():
         self.index = 0
         self.rolling_samples = rolling_samples
         self.width = width
-        self.color = color
+        self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.batch = batch
-        self.group = group
+        self.group = group_dict["background"]
 
         self.lines = []
         self.line_world_positions = []
@@ -162,6 +145,7 @@ class RollingRacingLine():
                 batch=self.batch,
                 group=self.group
             )
+            new_line.opacity = 90
             self.lines.append(new_line)
             self.line_world_positions.append((0, 0, 0, 0))
 
@@ -195,11 +179,11 @@ class RollingRacingLine():
 
         
 class StartFinishPoint():
-    def __init__(self, world_point, radius, color, batch, group, animation_manager):
+    def __init__(self, world_point, radius, color, batch, group_dict, animation_manager):
         self.animation_manager = animation_manager
         self.animation_manager.start_finish_point = self
         self.world_point = world_point
-        self.point = pyglet.shapes.Circle(0, 0, radius, color=color, batch=batch, group=group)
+        self.point = pyglet.shapes.Circle(0, 0, radius, color=color, batch=batch, group=group_dict["background"])
 
     def update_screen_position(self):
         self.point.position = self.animation_manager.fit_to_viewport(self.world_point[0], self.world_point[1])

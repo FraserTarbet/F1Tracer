@@ -2,12 +2,12 @@ import pyglet
 
 
 class Minimap():
-    def __init__(self, screen_position, size, frame, batch, GUI_groups, animation_manager):
+    def __init__(self, screen_position, size, frame, batch, group_dict, animation_manager):
         self.animation_manager = animation_manager
         self.animation_manager.minimap = self
         self.screen_position = screen_position
         self.backdrop = pyglet.shapes.Rectangle(screen_position[0], screen_position[1], size, size,
-            color=(255, 255, 255), batch=batch, group=GUI_groups[0])
+            color=(255, 255, 255), batch=batch, group=group_dict["GUI_back"])
         self.backdrop.opacity = 180
         
         self.lines = []
@@ -30,11 +30,11 @@ class Minimap():
                 width=3,
                 color=(0, 0, 0),
                 batch=batch,
-                group=GUI_groups[1]
+                group=group_dict["GUI_mid"]
             )
             self.lines.append(line)
 
-        self.marker = pyglet.shapes.Circle(0, 0, 5, color=(255, 30, 0), batch=batch, group=GUI_groups[2])
+        self.marker = pyglet.shapes.Circle(0, 0, 5, color=(255, 30, 0), batch=batch, group=group_dict["GUI_front"])
 
     def update_screen_position(self):
         world_point = self.animation_manager.view_centre

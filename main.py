@@ -12,14 +12,19 @@ pyglet.font.add_directory("fonts")
 
 window = pyglet.window.Window(640, 640)
 batch = pyglet.graphics.Batch()
-background = pyglet.graphics.OrderedGroup(0)
-midground = pyglet.graphics.OrderedGroup(1)
-foreground = pyglet.graphics.OrderedGroup(2)
-GUI_back = pyglet.graphics.OrderedGroup(3)
-GUI_mid = pyglet.graphics.OrderedGroup(4)
-GUI_front = pyglet.graphics.OrderedGroup(5)
-GUI_groups = (GUI_back, GUI_mid, GUI_front)
-static_batch = pyglet.graphics.Batch()
+groups = [
+    "background",
+    "midground",
+    "foreground",
+    "overlay",
+    "GUI_back",
+    "GUI_mid",
+    "GUI_front"
+]
+group_dict = {}
+for i, group_name in enumerate(groups):
+    group_dict[group_name] = pyglet.graphics.OrderedGroup(i)
+
 animation_manager = animation_manager.AnimationManager(window)
 
 ver_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 1, 8, 3)
@@ -32,10 +37,10 @@ ham_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 44, 19, 3
 ham_frame_smooth = data_functions.sample_smoothing(ham_frame.copy())
 
 racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
-#racing_line_trace = trace.RollingRacingLine(batch, midground, 3, (21, 21, 30), racing_line_frame, 50, animation_manager)
+racing_line_trace = trace.RollingRacingLine(batch, group_dict, 3, racing_line_frame, 50, animation_manager)
 
 start_finish_point = data_functions.make_start_finish_point(ver_frame.copy())
-start_finish_trace = trace.StartFinishPoint(start_finish_point, 8, (0, 0, 0), batch, midground, animation_manager)
+start_finish_trace = trace.StartFinishPoint(start_finish_point, 8, (0, 0, 0), batch, group_dict, animation_manager)
 
 radii = [
     5,
@@ -68,28 +73,28 @@ tcam = [
     True
 ]
 tails = [
-    False,
     True,
     False,
     True,
     False,
     True,
     False,
-    True
+    True,
+    False
 ]
 traces = []
 for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smooth, oco_frame, oco_frame_smooth, ham_frame, ham_frame_smooth]):
     frame = data_functions.add_animation_time(frame)
     tracking_window = data_functions.get_tracking_window(frame)
-    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i], tail=tails[i]))
+    traces.append(trace.Trace(batch, group_dict, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i], tail=tails[i]))
 
 animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
 #animation_manager.tracked_traces = [traces[3]]
 
-map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, GUI_groups, animation_manager)
+map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, group_dict, animation_manager)
 
-heading1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, GUI_groups)
-heading2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, GUI_groups)
+heading1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, group_dict)
+heading2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, group_dict)
 
 
 
@@ -102,7 +107,6 @@ pyglet.gl.glClearColor(247/255, 244/255, 241/255, 1)
 @window.event
 def on_draw():
     window.clear()
-    static_batch.draw()
     batch.draw()
     fps_display.draw()
 

@@ -34,6 +34,9 @@ class AnimationManager():
                 self.start()
                 return
 
+        if self.racing_line is not None:
+            self.racing_line.update_world_position(self.cumulative_dt)
+
 
         ### Update view position based on updated trace world positions
         if self.view_centre is None and len(self.tracked_traces) == 0:
@@ -93,7 +96,7 @@ class AnimationManager():
             self.tail_sections.remove(tail)
 
         if self.racing_line is not None:
-            self.racing_line.update_screen_position(self.cumulative_dt)
+            self.racing_line.update_screen_position()
 
         if self.start_finish_point is not None:
             self.start_finish_point.update_screen_position()

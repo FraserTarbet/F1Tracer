@@ -2,7 +2,7 @@ import pyglet
 
 
 class Heading():
-    def __init__(self, window, position, height, text, font_size, font_color, bg_color, batch, GUI_groups):
+    def __init__(self, window, position, height, text, font_size, font_color, bg_color, batch, group_dict):
         self.bg = pyglet.shapes.Rectangle(
             x=0,
             y=position,
@@ -10,7 +10,7 @@ class Heading():
             height=height,
             color=bg_color,
             batch=batch,
-            group=GUI_groups[0]
+            group=group_dict["GUI_back"]
         )
         self.text = pyglet.text.Label(
             text=text,
@@ -22,5 +22,5 @@ class Heading():
             y=position + height / 2,
             anchor_y="center",
             batch=batch,
-            group=GUI_groups[1]
+            group=group_dict["GUI_mid"]
         )
