@@ -36,7 +36,7 @@ class Minimap():
 
         self.marker = pyglet.shapes.Circle(0, 0, 5, color=(255, 30, 0), batch=batch, group=GUI_groups[2])
 
-    def update_position(self):
+    def update_screen_position(self):
         world_point = self.animation_manager.view_centre
         x = ((world_point[0] - self.min_x) * self.scale_factor) + self.screen_position[0] + self.offset_x
         y = ((world_point[1] - self.min_y) * self.scale_factor) + self.screen_position[1] + self.offset_y

@@ -23,7 +23,19 @@ class AnimationManager():
     def update_traces(self, dt):
         self.cumulative_dt += dt
 
-        # Update view position attribute (will always lag a frame behind traces, not a problem)
+        ### Update trace world positions
+        for trace in self.traces:
+            trace.update_world_position(self.cumulative_dt)
+        for trace in self.ended_traces:
+            if trace in self.traces:
+                self.traces.remove(trace)
+            if len(self.traces) == 0:
+                #pyglet.app.exit()
+                self.start()
+                return
+
+
+        ### Update view position based on updated trace world positions
         if self.view_centre is None and len(self.tracked_traces) == 0:
             # Centre and scale to cover all traces
             mins = []
@@ -69,35 +81,38 @@ class AnimationManager():
             self.view_centre = (x_sum / tracked_count, y_sum / tracked_count)
 
 
-        # Update traces
+        ### Fit trace world positions to screen space
         for trace in self.traces:
-            trace.update_position(self.cumulative_dt)
-        for trace in self.ended_traces:
-            if trace in self.traces:
-                self.traces.remove(trace)
-            if len(self.traces) == 0:
-                #pyglet.app.exit()
-                self.start()
-                return
+            trace.update_screen_position()
 
-
-        # Update tails
         ended_tails = []
         for tail in self.tail_sections:
-            ended = tail.update_position(self.cumulative_dt)
+            ended = tail.update_screen_position(self.cumulative_dt)
             if ended: ended_tails.append(tail)
         for tail in ended_tails:
             self.tail_sections.remove(tail)
 
-
         if self.racing_line is not None:
-            self.racing_line.update_position(self.cumulative_dt)
+            self.racing_line.update_screen_position(self.cumulative_dt)
 
         if self.start_finish_point is not None:
-            self.start_finish_point.update_position()
+            self.start_finish_point.update_screen_position()
 
         if self.minimap is not None:
-            self.minimap.update_position()
+            self.minimap.update_screen_position()
+
+
+
+        # Update view position attribute (will always lag a frame behind traces, not a problem)
+        
+
+
+        # Update traces
+        
+
+
+        # Update tails
+        
 
 
     def fit_to_viewport(self, world_x, world_y):

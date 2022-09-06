@@ -45,7 +45,7 @@ class Trace(pyglet.shapes.Circle):
         self.visible = True
         self.animation_manager.traces.append(self)
 
-    def update_position(self, cumulative_dt):
+    def update_world_position(self, cumulative_dt):
         # Increment index if needed
         if cumulative_dt >= self.time_tuple[self.index + 1]:
             self.index += 1
@@ -54,10 +54,6 @@ class Trace(pyglet.shapes.Circle):
                 self.animation_manager.ended_traces.append(self)
                 self.visible = False
                 return
-
-        # Update tracking variable if used
-        if self.use_tracking_window:
-            self.trackable = self.tracking_window[0] <= cumulative_dt <= self.tracking_window[1]
 
         # Interpolate X & Y coords based on where cumulative dt falls between samples
         prev_time = self.time_tuple[self.index]
@@ -71,21 +67,12 @@ class Trace(pyglet.shapes.Circle):
 
         interp_x = prev_x + ((next_x - prev_x) * interp_factor)
         interp_y = prev_y + ((next_y - prev_y) * interp_factor)
-        # interp_x = prev_x
-        # interp_y = prev_y
 
-        # Adjust to viewport
         self.world_position = (interp_x, interp_y)
-        fit_to_viewport = self.animation_manager.fit_to_viewport(interp_x, interp_y)
-        self.position = fit_to_viewport
 
-        # Adjust any label
-        if self.tla:
-            self.tla.update_position()
-
-        # Adjust any T-cam
-        if self.tcam:
-            self.tcam.position = self.position
+        # Update tracking variable if used
+        if self.use_tracking_window:
+            self.trackable = self.tracking_window[0] <= cumulative_dt <= self.tracking_window[1] 
 
         # Update any tail
         if self.tail:
@@ -108,6 +95,18 @@ class Trace(pyglet.shapes.Circle):
                 self.animation_manager.tail_sections.append(tail_section)
                 self.tail_last_point = self.world_position
                 self.tail_last_dt = cumulative_dt
+
+
+    def update_screen_position(self):
+        self.position = self.animation_manager.fit_to_viewport(self.world_position[0], self.world_position[1])
+
+        # Adjust any label
+        if self.tla:
+            self.tla.update_screen_position()
+
+        # Adjust any T-cam
+        if self.tcam:
+            self.tcam.position = self.position
 
 
 class RacingLine():
@@ -173,7 +172,7 @@ class RollingRacingLine():
             self.index += 1
 
 
-    def update_position(self, cumulative_dt):
+    def update_world_position(self, cumulative_dt):
         # Roll through lines
         # Increment index if needed
         if cumulative_dt >= self.time_tuple[self.index - int(self.rolling_samples / 2)]:
@@ -186,6 +185,8 @@ class RollingRacingLine():
                 self.line_world_positions.append(line_world_position)
                 self.index += 1
 
+        
+    def update_screen_position(self):
         # Adjust all lines to viewport
         for i, line in enumerate(self.lines):
             coords_1 = self.animation_manager.fit_to_viewport(self.line_world_positions[i][0], self.line_world_positions[i][1])
@@ -200,7 +201,7 @@ class StartFinishPoint():
         self.world_point = world_point
         self.point = pyglet.shapes.Circle(0, 0, radius, color=color, batch=batch, group=group)
 
-    def update_position(self):
+    def update_screen_position(self):
         self.point.position = self.animation_manager.fit_to_viewport(self.world_point[0], self.world_point[1])
 
 
@@ -210,7 +211,7 @@ class TraceLabel(pyglet.text.Label):
         self.parent_trace = parent_trace
         self.offset = offset
 
-    def update_position(self):
+    def update_screen_position(self):
         self.position = (self.parent_trace.position[0] + self.offset[0], self.parent_trace.position[1] + self.offset[1])
 
 
@@ -224,7 +225,7 @@ class TailSection(pyglet.shapes.Line):
         self.opacity_times = (0.0, 0.25, 1.5)
         self.init_dt = cumulative_dt
 
-    def update_position(self, cumulative_dt):
+    def update_screen_position(self, cumulative_dt):
         # Update to viewport
         coords_1 = self.animation_manager.fit_to_viewport(self.world_positions[0], self.world_positions[1])
         coords_2 = self.animation_manager.fit_to_viewport(self.world_positions[2], self.world_positions[3])

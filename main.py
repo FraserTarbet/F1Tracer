@@ -83,8 +83,8 @@ for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smo
     tracking_window = data_functions.get_tracking_window(frame)
     traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i], tail=tails[i]))
 
-#animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
-animation_manager.tracked_traces = [traces[3]]
+animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
+#animation_manager.tracked_traces = [traces[3]]
 
 map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, GUI_groups, animation_manager)
 
