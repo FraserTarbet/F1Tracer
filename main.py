@@ -1,6 +1,7 @@
 import pyglet
 import animation_manager
 import data_functions
+import headings
 import read_database
 import trace
 import minimap
@@ -75,6 +76,10 @@ for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smo
 animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
 
 map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, GUI_groups, animation_manager)
+
+heading1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, GUI_groups)
+heading2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, GUI_groups)
+
 
 
 pyglet.clock.schedule(animation_manager.update_traces)
