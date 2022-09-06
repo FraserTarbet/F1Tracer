@@ -9,7 +9,6 @@ import minimap
 
 pyglet.font.add_directory("fonts")
 
-
 window = pyglet.window.Window(640, 640)
 batch = pyglet.graphics.Batch()
 groups = [
@@ -27,88 +26,116 @@ for i, group_name in enumerate(groups):
 
 animation_manager = animation_manager.AnimationManager(window)
 
-ver_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 1, 8, 3)
-ver_frame_smooth = data_functions.sample_smoothing(ver_frame.copy())
-sai_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 55, 10, 3)
-sai_frame_smooth = data_functions.sample_smoothing(sai_frame.copy())
-oco_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 31, 12, 3)
-oco_frame_smooth = data_functions.sample_smoothing(oco_frame.copy())
-ham_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 44, 19, 3)
-ham_frame_smooth = data_functions.sample_smoothing(ham_frame.copy())
+static_elements = []
 
-racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
-racing_line_trace = trace.RollingRacingLine(batch, group_dict, 3, racing_line_frame, 50, animation_manager)
 
-start_finish_point = data_functions.make_start_finish_point(ver_frame.copy())
-start_finish_trace = trace.StartFinishPoint(start_finish_point, 8, (0, 0, 0), batch, group_dict, animation_manager)
+def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, buffer_seconds, master_lap_index=0):
+    raw_frames = []
+    smooth_frames = []
+    tracked_traces = []
 
-radii = [
-    5,
-    10,
-    5,
-    10,
-    5,
-    10,
-    5,
-    10
+    # Driver traces
+    for driver, lap, tcam, tracked in driver_lap_tcam_tracked_tuples:
+        # Get frames
+        raw_frame = read_database.read_lap_samples(session_date, session_name, driver, lap, buffer_seconds)
+        smooth_frame = data_functions.sample_smoothing(raw_frame.copy())
+        raw_frame = data_functions.add_animation_time(raw_frame)
+        smooth_frame = data_functions.add_animation_time(smooth_frame)
+        raw_frames.append(raw_frame)
+        smooth_frames.append(smooth_frame)
+
+        tracking_window = data_functions.get_tracking_window(raw_frame)
+
+        # Make traces
+        raw_trace = trace.Trace(
+            batch=batch, 
+            group_dict=group_dict, 
+            radius=5, 
+            frame=raw_frame, 
+            animation_manager=animation_manager, 
+            tracking_window=tracking_window, 
+            tla=False, 
+            tcam=tcam, 
+            tail=True
+        )
+        smooth_trace = trace.Trace(
+            batch=batch,
+            group_dict=group_dict,
+            radius=10,
+            frame=smooth_frame,
+            animation_manager=animation_manager,
+            tracking_window=None,
+            tla=True,
+            tcam=tcam,
+            tail=False
+        )
+
+        if tracked: tracked_traces.append(raw_trace)
+
+    animation_manager.tracked_traces = tracked_traces
+
+    # Racing line and start/finish marker based on master lap
+    trace.RollingRacingLine(
+        batch=batch, 
+        group_dict=group_dict, 
+        width=3, 
+        frame=raw_frames[master_lap_index], 
+        rolling_samples=50, 
+        animation_manager=animation_manager
+    )
+    start_finish_point = data_functions.make_start_finish_point(raw_frames[master_lap_index])
+    trace.StartFinishPoint(
+        world_point=start_finish_point, 
+        radius=5, 
+        color=(0, 0, 0), 
+        batch=batch, 
+        group_dict=group_dict, 
+        animation_manager=animation_manager
+    )
+
+    # Minimap, headings, etc.
+    minimap.Minimap((20, 20), 180, raw_frames[master_lap_index], batch, group_dict, animation_manager)
+
+    h1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, group_dict)
+    h2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, group_dict)
+    for h in (h1, h2): static_elements.append(h)
+
+    note_text = "Note: This animation contains imprecisions due to source telemetry's low sample rate (~5Hz) and significant jitter." \
+        "Small markers follow an interpolated version of the raw data. Large markers represent a smoother, filtered version of the data."
+    
+    note_doc = pyglet.text.document.UnformattedDocument(note_text)
+    note_doc.set_style(0, 100, attributes={
+        "font_name": "TitilliumWeb-Regular",
+        "font_size": 9,
+        "color": (21, 21, 30, 255)
+    })
+    note_layout = pyglet.text.layout.TextLayout(note_doc, 350, 60, True, batch=batch, group=group_dict["GUI_front"], wrap_lines=True)
+    note_layout.position = (250, 10)
+
+    static_elements.append(note_layout)
+
+
+driver_lap_tcam_tracked_tuples = [
+    (1, 8, False, True),
+    (55, 10, True, True),
+    (31, 12, True, False),
+    (44, 19, True, False),
+    (11, 8, True, True),
+    (16, 12, False, True),
+    (14, 15, False, False),
+    (63, 7, False, False)
 ]
-tla = [
-    False,
-    True,
-    False,
-    True,
-    False,
-    True,
-    False,
-    True
-]
-tcam = [
-    False,
-    False,
-    False,
-    False,
-    False,
-    False,
-    False,
-    True
-]
-tails = [
-    True,
-    False,
-    True,
-    False,
-    True,
-    False,
-    True,
-    False
-]
-traces = []
-for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smooth, oco_frame, oco_frame_smooth, ham_frame, ham_frame_smooth]):
-    frame = data_functions.add_animation_time(frame)
-    tracking_window = data_functions.get_tracking_window(frame)
-    traces.append(trace.Trace(batch, group_dict, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i], tail=tails[i]))
+full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, 3, 0)
 
-animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
-#animation_manager.tracked_traces = [traces[3]]
-
-map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, group_dict, animation_manager)
-
-heading1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, group_dict)
-heading2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, group_dict)
-
-
-
-pyglet.clock.schedule(animation_manager.update_traces)
-
-fps_display = pyglet.window.FPSDisplay(window=window)
 pyglet.options["vsync"] = False
 pyglet.gl.glClearColor(247/255, 244/255, 241/255, 1)
+
+pyglet.clock.schedule(animation_manager.update_traces)
 
 @window.event
 def on_draw():
     window.clear()
     batch.draw()
-    fps_display.draw()
 
 
 if __name__ == "__main__":

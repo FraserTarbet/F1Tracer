@@ -31,7 +31,7 @@ class Trace(pyglet.shapes.Circle):
             self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group_dict["overlay"])
 
         if tcam:
-            self.tcam = pyglet.shapes.Circle(0, 0, radius/2, color=(255, 255, 0), batch=batch, group=group_dict["overlay"])
+            self.tcam = pyglet.shapes.Circle(0, 0, radius/3, color=(255, 255, 0), batch=batch, group=group_dict["overlay"])
         else:
             self.tcam = None
 
