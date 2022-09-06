@@ -29,7 +29,7 @@ animation_manager = animation_manager.AnimationManager(window)
 static_elements = []
 
 
-def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, buffer_seconds, master_lap_index=0):
+def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, heading1, heading2, buffer_seconds, master_lap_index=0):
     raw_frames = []
     smooth_frames = []
     tracked_traces = []
@@ -96,8 +96,8 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     # Minimap, headings, etc.
     minimap.Minimap((20, 20), 180, raw_frames[master_lap_index], batch, group_dict, animation_manager)
 
-    h1 = headings.Heading(window, window.height - 40, 40, "Belgian Grand Prix 2022", 18, (255, 255, 255, 255), (255, 30, 0), batch, group_dict)
-    h2 = headings.Heading(window, window.height - 70, 30, "Qualifying Laps", 14, (255, 255, 255, 255), (0, 0, 0), batch, group_dict)
+    h1 = headings.Heading(window, window.height - 40, 40, heading1, 18, (255, 255, 255, 255), (255, 30, 0), batch, group_dict)
+    h2 = headings.Heading(window, window.height - 70, 30, heading2, 14, (255, 255, 255, 255), (0, 0, 0), batch, group_dict)
     for h in (h1, h2): static_elements.append(h)
 
     note_text = "Note: This animation contains imprecisions due to source telemetry's low sample rate (~5Hz) and significant jitter." \
@@ -125,7 +125,7 @@ driver_lap_tcam_tracked_tuples = [
     (14, 15, False, False),
     (63, 7, False, False)
 ]
-full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, 3, 0)
+full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
 
 pyglet.options["vsync"] = False
 pyglet.gl.glClearColor(247/255, 244/255, 241/255, 1)
