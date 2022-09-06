@@ -138,3 +138,6 @@ class AnimationManager():
 
         if self.racing_line:
             self.racing_line.start()
+
+        for tail in self.tail_sections:
+            tail.visible = False

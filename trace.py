@@ -44,6 +44,9 @@ class Trace(pyglet.shapes.Circle):
     def restart(self):
         self.index = 0
         self.visible = True
+        if self.tail:
+            self.tail_last_dt = 0
+            self.tail_last_point = None
         self.animation_manager.traces.append(self)
 
     def update_world_position(self, cumulative_dt):
