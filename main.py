@@ -32,7 +32,7 @@ ham_frame = read_database.read_lap_samples("2022-08-27", "Qualifying", 44, 19, 3
 ham_frame_smooth = data_functions.sample_smoothing(ham_frame.copy())
 
 racing_line_frame = data_functions.add_animation_time(ver_frame.copy())
-racing_line_trace = trace.RollingRacingLine(batch, midground, 3, (21, 21, 30), racing_line_frame, 50, animation_manager)
+#racing_line_trace = trace.RollingRacingLine(batch, midground, 3, (21, 21, 30), racing_line_frame, 50, animation_manager)
 
 start_finish_point = data_functions.make_start_finish_point(ver_frame.copy())
 start_finish_trace = trace.StartFinishPoint(start_finish_point, 8, (0, 0, 0), batch, midground, animation_manager)
@@ -67,13 +67,24 @@ tcam = [
     False,
     True
 ]
+tails = [
+    False,
+    True,
+    False,
+    True,
+    False,
+    True,
+    False,
+    True
+]
 traces = []
 for i, frame in enumerate([ver_frame, ver_frame_smooth, sai_frame, sai_frame_smooth, oco_frame, oco_frame_smooth, ham_frame, ham_frame_smooth]):
     frame = data_functions.add_animation_time(frame)
     tracking_window = data_functions.get_tracking_window(frame)
-    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i]))
+    traces.append(trace.Trace(batch, foreground, radii[i], frame, animation_manager, tracking_window, tla=tla[i], tcam=tcam[i], tail=tails[i]))
 
-animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
+#animation_manager.tracked_traces = [traces[1], traces[3], traces[5]]
+animation_manager.tracked_traces = [traces[3]]
 
 map = minimap.Minimap((20, 20), 180, ver_frame.copy(), batch, GUI_groups, animation_manager)
 

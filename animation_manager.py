@@ -7,6 +7,7 @@ class AnimationManager():
         self.traces = []
         self.racing_line = None
         self.start_finish_point = None
+        self.tail_sections = []
         self.track_to_start_finish = track_to_start_finish
         self.cumulative_dt = 0
         self.ended_traces = []
@@ -79,6 +80,16 @@ class AnimationManager():
                 self.start()
                 return
 
+
+        # Update tails
+        ended_tails = []
+        for tail in self.tail_sections:
+            ended = tail.update_position(self.cumulative_dt)
+            if ended: ended_tails.append(tail)
+        for tail in ended_tails:
+            self.tail_sections.remove(tail)
+
+
         if self.racing_line is not None:
             self.racing_line.update_position(self.cumulative_dt)
 
@@ -107,4 +118,5 @@ class AnimationManager():
             animation_starts.append(min(trace.time_tuple))
         self.cumulative_dt = min(animation_starts)
 
-        self.racing_line.start()
+        if self.racing_line:
+            self.racing_line.start()

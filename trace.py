@@ -6,7 +6,7 @@ def hex_to_rgb(hex_string):
 
 
 class Trace(pyglet.shapes.Circle):
-    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla = False, tcam = False):
+    def __init__(self, batch, group, radius, frame, animation_manager, tracking_window=None, tla=False, tcam=False, tail=False):
         super().__init__(200, 200, radius, batch=batch, group=group)
         self.color = hex_to_rgb(frame["TeamColour"].iloc[0])
         self.time_tuple = tuple(frame["AnimTime"])
@@ -16,21 +16,29 @@ class Trace(pyglet.shapes.Circle):
         self.animation_manager = animation_manager
         self.world_position = (0, 0)
         self.animation_manager.traces.append(self)
+
+        self.tracking_window = tracking_window
         if tracking_window is not None:
             self.use_tracking_window = True
-            self.tracking_window = tracking_window
             self.trackable = False
         else:
             self.use_tracking_window = False
             self.trackable = True
+
+        self.tla = tla
         if tla:
             self.tla = TraceLabel(self, frame["Tla"].iloc[0], self.color + (255, ), (10, 10), batch, group)
-        else:
-            self.tla = None
+
         if tcam:
             self.tcam = pyglet.shapes.Circle(0, 0, radius/2, color=(255, 255, 0), batch=batch, group=group)
         else:
             self.tcam = None
+
+        self.tail = tail
+        if tail:
+            self.tail_last_dt = 0
+            self.tail_last_point = None
+    
 
     def restart(self):
         self.index = 0
@@ -72,12 +80,34 @@ class Trace(pyglet.shapes.Circle):
         self.position = fit_to_viewport
 
         # Adjust any label
-        if self.tla is not None:
+        if self.tla:
             self.tla.update_position()
 
         # Adjust any T-cam
-        if self.tcam is not None:
+        if self.tcam:
             self.tcam.position = self.position
+
+        # Update any tail
+        if self.tail:
+            if self.tail_last_point is None:
+                self.tail_last_point = self.world_position
+                self.tail_last_dt = cumulative_dt
+            elif cumulative_dt - self.tail_last_dt > 0.1:
+                tail_section = TailSection(
+                    self.tail_last_point[0], 
+                    self.tail_last_point[1], 
+                    self.world_position[0],
+                    self.world_position[1],
+                    self.radius,
+                    self.color,
+                    self._batch,
+                    self._group,
+                    self.animation_manager,
+                    cumulative_dt
+                )
+                self.animation_manager.tail_sections.append(tail_section)
+                self.tail_last_point = self.world_position
+                self.tail_last_dt = cumulative_dt
 
 
 class RacingLine():
@@ -182,3 +212,39 @@ class TraceLabel(pyglet.text.Label):
 
     def update_position(self):
         self.position = (self.parent_trace.position[0] + self.offset[0], self.parent_trace.position[1] + self.offset[1])
+
+
+class TailSection(pyglet.shapes.Line):
+    def __init__(self, x, y, x2, y2, width, color, batch, group, animation_manager, cumulative_dt):
+        super().__init__(x, y, x2, y2, width, color, batch, group)
+        self.animation_manager = animation_manager
+        self.animation_manager.tail_sections.append(self)
+        self.world_positions = (x, y, x2, y2)
+        self.opacity_values = (0, 180, 0)
+        self.opacity_times = (0.0, 0.25, 1.5)
+        self.init_dt = cumulative_dt
+
+    def update_position(self, cumulative_dt):
+        # Update to viewport
+        coords_1 = self.animation_manager.fit_to_viewport(self.world_positions[0], self.world_positions[1])
+        coords_2 = self.animation_manager.fit_to_viewport(self.world_positions[2], self.world_positions[3])
+        self.position = (coords_1[0], coords_1[1], coords_2[0], coords_2[1])
+
+        # Update opacity
+        # Return True if ready to cull from animation array
+        time_passed = cumulative_dt - self.init_dt
+        i_prev = 0
+        for i, t in enumerate(self.opacity_times):
+            if t < time_passed: i_prev = i
+
+        if i_prev == len(self.opacity_times) - 1:
+            return True
+        else:
+            interp_factor = (time_passed - self.opacity_times[i_prev]) / (self.opacity_times[i_prev + 1] - self.opacity_times[i_prev])
+            opacity = self.opacity_values[i_prev] + (self.opacity_values[i_prev + 1] - self.opacity_values[i_prev]) * interp_factor
+            self.opacity = opacity
+            return False
+
+            
+
+        
