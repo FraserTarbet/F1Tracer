@@ -4,6 +4,7 @@ import animation_manager
 import data_functions
 import headings
 import read_database
+import readout
 import trace
 import minimap
 
@@ -124,6 +125,9 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     readout_frame = pd.concat(readout_frames)
     readout_frame.reset_index(inplace=True, drop=True)
     readout_frame = data_functions.add_readout_deltas(readout_frame)
+
+    readout.Readout(readout_frame, (420, 540), animation_manager, batch, group_dict)
+
 
 
 

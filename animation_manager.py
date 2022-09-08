@@ -7,6 +7,7 @@ class AnimationManager():
         self.traces = []
         self.racing_line = None
         self.start_finish_point = None
+        self.readout = None
         self.tail_sections = []
         self.track_to_start_finish = track_to_start_finish
         self.cumulative_dt = 0
@@ -106,6 +107,9 @@ class AnimationManager():
         if self.minimap is not None:
             self.minimap.update_screen_position()
 
+        if self.readout is not None:
+            self.readout.update_screen_position(self.cumulative_dt)
+
 
         # End all running traces if no tracked traces have ended for a few seconds (i.e. clean up traces which have crashed)
         if self.last_tracked_trace_ended is not None and self.cumulative_dt - self.last_tracked_trace_ended > 3.0:
@@ -136,3 +140,6 @@ class AnimationManager():
 
         for tail in self.tail_sections:
             tail.visible = False
+
+        if self.readout:
+            self.readout.restart()
