@@ -100,6 +100,7 @@ BEGIN
 
 	INNER JOIN dbo.DriverInfo AS D
 	ON L.Driver = D.RacingNumber
+	AND S.id = D.SessionId
 
 	WHERE CAST(S.SessionDate AS DATE) = @SessionDate
 	AND S.SessionName = @SessionName
