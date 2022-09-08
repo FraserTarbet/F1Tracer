@@ -30,3 +30,20 @@ def read_lap_samples(session_date, session_name, driver_number, lap_number, buff
     sqlalchemy_engine.dispose()
 
     return frame
+
+
+def read_times(session_date, session_name, driver_number, lap_number):
+    sqlalchemy_engine = get_sqlalchemy_engine()
+    sql_query = f"""
+        SET NOCOUNT ON;
+
+        EXEC dbo._Tracing_Times 
+            @SessionDate = '{session_date}',
+            @SessionName = '{session_name}',
+            @DriverNumber = {driver_number},
+            @LapNumber = {lap_number}
+    """
+    frame = pd.read_sql_query(sql_query, sqlalchemy_engine)
+    sqlalchemy_engine.dispose()
+
+    return frame

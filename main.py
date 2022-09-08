@@ -1,3 +1,4 @@
+import pandas as pd
 import pyglet
 import animation_manager
 import data_functions
@@ -113,6 +114,17 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     note_layout.position = (250, 10)
 
     static_elements.append(note_layout)
+
+    # Lap/sector time readouts
+    readout_frames = []
+    for driver, lap, tcam, tracked in driver_lap_tcam_tracked_tuples:
+        readout_data = read_database.read_times(session_date, session_name, driver, lap)
+        readout_data = data_functions.add_readout_animation_times(readout_data)
+        readout_frames.append(readout_data)
+    readout_frame = pd.concat(readout_frames)
+    readout_frame.reset_index(inplace=True, drop=True)
+    readout_frame = data_functions.add_readout_deltas(readout_frame)
+
 
 
 # driver_lap_tcam_tracked_tuples = [
