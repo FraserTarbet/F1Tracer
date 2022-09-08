@@ -12,6 +12,7 @@ class AnimationManager():
         self.cumulative_dt = 0
         self.ended_traces = []
         self.tracked_traces = []
+        self.last_tracked_trace_ended = None
         self.view_centre = None
         self.view_scale = 1000
         self.view_border = 60
@@ -29,6 +30,7 @@ class AnimationManager():
         for trace in self.ended_traces:
             if trace in self.traces:
                 self.traces.remove(trace)
+                if trace in self.tracked_traces: self.last_tracked_trace_ended = self.cumulative_dt
             if len(self.traces) == 0:
                 #pyglet.app.exit()
                 self.start()
@@ -105,17 +107,10 @@ class AnimationManager():
             self.minimap.update_screen_position()
 
 
-
-        # Update view position attribute (will always lag a frame behind traces, not a problem)
-        
-
-
-        # Update traces
-        
-
-
-        # Update tails
-        
+        # End all running traces if no tracked traces have ended for a few seconds (i.e. clean up traces which have crashed)
+        if self.last_tracked_trace_ended is not None and self.cumulative_dt - self.last_tracked_trace_ended > 3.0:
+            for trace in self.traces:
+                self.ended_traces.append(trace)
 
 
     def fit_to_viewport(self, world_x, world_y):

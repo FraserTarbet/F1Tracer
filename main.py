@@ -132,7 +132,7 @@ driver_lap_tcam_tracked_tuples = [
     (16, 17, False, True),
     (55, 17, True, True),
     (44, 14, True, True),
-    (11, 15, True, False),
+    (11, 18, True, False),
     (63, 14, False, False),
     (4, 17, True, False)
 ]
