@@ -71,7 +71,7 @@ class Trace(pyglet.shapes.Circle):
 
         interp_x = prev_x + ((next_x - prev_x) * interp_factor)
         interp_y = prev_y + ((next_y - prev_y) * interp_factor)
-
+        
         self.world_position = (interp_x, interp_y)
 
         # Update tracking variable if used

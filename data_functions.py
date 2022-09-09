@@ -17,7 +17,7 @@ def get_tracking_window(frame):
 
 
 def sample_smoothing(frame):
-    window = 15
+    window = 9
     order = 1
     for axis in ("X", "Y"):
         smoothed = savgol_filter(frame[axis], window, order)

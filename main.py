@@ -108,7 +108,7 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     for h in (h1, h2): static_elements.append(h)
 
     note_text = "Note: This animation contains imprecisions due to source telemetry's low sample rate (~5Hz) and significant jitter." \
-        "Small markers follow an interpolated version of the raw data. Large markers represent a smoother, filtered version of the data."
+        "Small markers follow an interpolated version of the raw signal. Large markers represent a smooth, heavily filtered signal."
     
     note_doc = pyglet.text.document.UnformattedDocument(note_text)
     note_doc.set_style(0, 100, attributes={
@@ -136,28 +136,28 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
 
 
 
-driver_lap_tcam_tracked_tuples = [
-    (1, 8, False, True),
-    (55, 10, True, True),
-    (31, 12, True, False),
-    (44, 19, True, False),
-    (11, 8, True, True),
-    (16, 12, False, True),
-    (14, 15, False, False),
-    (63, 7, False, False)
-]
-full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
-
 # driver_lap_tcam_tracked_tuples = [
-#     (1, 11, False, True),
-#     (16, 17, False, True),
-#     (55, 17, True, True),
-#     (44, 14, True, True),
-#     (11, 18, True, False),
-#     (63, 14, False, False),
-#     (4, 17, True, False)
+#     (1, 8, False, True),
+#     (55, 10, True, True),
+#     (31, 12, True, False),
+#     (44, 19, True, False),
+#     (11, 8, True, True),
+#     (16, 12, False, True),
+#     (14, 15, False, False),
+#     (63, 7, False, False)
 # ]
-# full_lap_follow("2022-09-03", "Qualifying", driver_lap_tcam_tracked_tuples, "Dutch Grand Prix 2022", "Qualifying Laps", 3, 0)
+# full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
+
+driver_lap_tcam_tracked_tuples = [
+    (1, 11, False, True),
+    (16, 17, False, True),
+    (55, 17, True, True),
+    (44, 14, True, True),
+    (11, 18, True, False),
+    (63, 14, False, False),
+    (4, 17, True, False)
+]
+full_lap_follow("2022-09-03", "Qualifying", driver_lap_tcam_tracked_tuples, "Dutch Grand Prix 2022", "Qualifying Laps", 3, 0)
 
 
 pyglet.options["vsync"] = False

@@ -17,7 +17,7 @@ class Heading():
             font_name="TitilliumWeb-Regular",
             font_size=font_size,
             color=font_color,
-            bold=False,
+            bold=True,
             x=5,
             y=position + height / 2,
             anchor_y="center",
