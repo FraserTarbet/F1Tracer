@@ -122,7 +122,7 @@ class Readout():
 
     def update_screen_position(self, cumulative_dt):
         # Set each collection of objects visible as animation time is reached
-        if self.anim_times[self.next_reveal_index] <= cumulative_dt:
+        if self.next_reveal_index < len(self.anim_times) and self.anim_times[self.next_reveal_index] <= cumulative_dt:
             if len(self.visible_objects) == 0:
                 for ob in self.heading_objects:
                     ob.visible = True
