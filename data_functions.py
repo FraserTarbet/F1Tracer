@@ -1,4 +1,6 @@
+import pandas as pd
 from scipy.signal import savgol_filter
+from scipy import interpolate
 
 def add_animation_time(frame):
     start_time = frame["LapStartTime"].iloc[0]
@@ -15,11 +17,13 @@ def get_tracking_window(frame):
 
 
 def sample_smoothing(frame):
+    window = 5
+    order = 2
     for axis in ("X", "Y"):
-        smoothed = savgol_filter(frame[axis], 10, 3)
+        smoothed = savgol_filter(frame[axis], window, order)
         frame[axis] = smoothed
 
-    smoothed = savgol_filter(frame["Time"], 10, 3)
+    smoothed = savgol_filter(frame["Time"], window, order)
     frame["Time"] = smoothed
 
     return frame
@@ -104,3 +108,43 @@ def add_readout_deltas(frame):
             x["Driver"] == first_driver_per_sector[i]), axis=1)
 
     return frame
+
+
+def interpolate_gaps(frame):
+    # Identify gaps > 0.5s, create interpolated samples
+    raw = frame.copy()
+    raw["TimeToNext"] = (raw["Time"].shift(-1) - raw["Time"]) / 1000000000
+
+    gap_starts = raw.loc[raw["TimeToNext"] >= 0.5].copy()
+    gap_starts["NewPoints"] = gap_starts["TimeToNext"] / 0.5
+    gap_starts["NewPoints"] = gap_starts["NewPoints"].astype(int)
+    gap_starts["NewGap"] = gap_starts["TimeToNext"] / (gap_starts["NewPoints"] + 1)
+
+    times = list(gap_starts["Time"])
+    new_points = list(gap_starts["NewPoints"])
+    new_gap = list(gap_starts["NewGap"])
+
+    interp_times = []
+    for i, time in enumerate(times):
+        for p in range(1, new_points[i] + 1):
+            interp_time = time + (new_gap[i] * p) * 1000000000
+            interp_times.append(interp_time)
+
+    spline_x = interpolate.splrep(raw["Time"], raw["X"])
+    spline_y = interpolate.splrep(raw["Time"], raw["Y"])
+
+    interp_frame = pd.DataFrame(interp_times, columns=["Time"])
+    interp_frame["X"] = interpolate.splev(interp_frame["Time"], spline_x)
+    interp_frame["Y"] = interpolate.splev(interp_frame["Time"], spline_y)
+    interp_frame["Interpolated"] = True
+
+    for col in ["Driver", "Tla", "TeamColour", "LapStartTime", "LapEndTime"]:
+        interp_frame[col] = raw[col]
+
+    raw["Interpolated"] = False
+    interpolated = pd.concat([raw, interp_frame])
+
+    interpolated.sort_values("Time", inplace=True)
+    interpolated.reset_index(inplace=True, drop=True)
+
+    return interpolated

@@ -39,14 +39,17 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     # Driver traces
     for driver, lap, tcam, tracked in driver_lap_tcam_tracked_tuples:
         # Get frames
-        raw_frame = read_database.read_lap_samples(session_date, session_name, driver, lap, buffer_seconds)
-        smooth_frame = data_functions.sample_smoothing(raw_frame.copy())
+        frame = read_database.read_lap_samples(session_date, session_name, driver, lap, buffer_seconds)
+        raw_frame = frame.copy()
         raw_frame = data_functions.add_animation_time(raw_frame)
-        smooth_frame = data_functions.add_animation_time(smooth_frame)
         raw_frames.append(raw_frame)
+
+        smooth_frame = data_functions.interpolate_gaps(frame.copy())
+        smooth_frame = data_functions.sample_smoothing(smooth_frame)
+        smooth_frame = data_functions.add_animation_time(smooth_frame)
         smooth_frames.append(smooth_frame)
 
-        tracking_window = data_functions.get_tracking_window(raw_frame)
+        tracking_window = data_functions.get_tracking_window(smooth_frame)
 
         # Make traces
         raw_trace = trace.Trace(
@@ -55,7 +58,7 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
             radius=5, 
             frame=raw_frame, 
             animation_manager=animation_manager, 
-            tracking_window=tracking_window, 
+            tracking_window=None, 
             tla=False, 
             tcam=tcam, 
             tail=True
@@ -66,13 +69,13 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
             radius=10,
             frame=smooth_frame,
             animation_manager=animation_manager,
-            tracking_window=None,
+            tracking_window=tracking_window,
             tla=True,
             tcam=tcam,
             tail=False
         )
 
-        if tracked: tracked_traces.append(raw_trace)
+        if tracked: tracked_traces.append(smooth_trace)
 
     animation_manager.tracked_traces = tracked_traces
 
