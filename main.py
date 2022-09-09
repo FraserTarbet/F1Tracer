@@ -41,10 +41,12 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
         # Get frames
         frame = read_database.read_lap_samples(session_date, session_name, driver, lap, buffer_seconds)
         raw_frame = frame.copy()
+        raw_frame = data_functions.interpolate_gaps(raw_frame)
         raw_frame = data_functions.add_animation_time(raw_frame)
         raw_frames.append(raw_frame)
 
-        smooth_frame = data_functions.interpolate_gaps(frame.copy())
+        smooth_frame = frame.copy()
+        smooth_frame = data_functions.interpolate_gaps(smooth_frame)
         smooth_frame = data_functions.sample_smoothing(smooth_frame)
         smooth_frame = data_functions.add_animation_time(smooth_frame)
         smooth_frames.append(smooth_frame)
@@ -134,28 +136,28 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
 
 
 
-# driver_lap_tcam_tracked_tuples = [
-#     (1, 8, False, True),
-#     (55, 10, True, True),
-#     (31, 12, True, False),
-#     (44, 19, True, False),
-#     (11, 8, True, True),
-#     (16, 12, False, True),
-#     (14, 15, False, False),
-#     (63, 7, False, False)
-# ]
-# full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
-
 driver_lap_tcam_tracked_tuples = [
-    (1, 11, False, True),
-    (16, 17, False, True),
-    (55, 17, True, True),
-    (44, 14, True, True),
-    (11, 18, True, False),
-    (63, 14, False, False),
-    (4, 17, True, False)
+    (1, 8, False, True),
+    (55, 10, True, True),
+    (31, 12, True, False),
+    (44, 19, True, False),
+    (11, 8, True, True),
+    (16, 12, False, True),
+    (14, 15, False, False),
+    (63, 7, False, False)
 ]
-full_lap_follow("2022-09-03", "Qualifying", driver_lap_tcam_tracked_tuples, "Dutch Grand Prix 2022", "Qualifying Laps", 3, 0)
+full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
+
+# driver_lap_tcam_tracked_tuples = [
+#     (1, 11, False, True),
+#     (16, 17, False, True),
+#     (55, 17, True, True),
+#     (44, 14, True, True),
+#     (11, 18, True, False),
+#     (63, 14, False, False),
+#     (4, 17, True, False)
+# ]
+# full_lap_follow("2022-09-03", "Qualifying", driver_lap_tcam_tracked_tuples, "Dutch Grand Prix 2022", "Qualifying Laps", 3, 0)
 
 
 pyglet.options["vsync"] = False

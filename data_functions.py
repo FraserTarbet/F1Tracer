@@ -17,8 +17,8 @@ def get_tracking_window(frame):
 
 
 def sample_smoothing(frame):
-    window = 5
-    order = 2
+    window = 15
+    order = 1
     for axis in ("X", "Y"):
         smoothed = savgol_filter(frame[axis], window, order)
         frame[axis] = smoothed
@@ -111,12 +111,13 @@ def add_readout_deltas(frame):
 
 
 def interpolate_gaps(frame):
-    # Identify gaps > 0.5s, create interpolated samples
+    # Identify gaps > gap_seconds, create interpolated samples
+    gap_seconds = 0.3
     raw = frame.copy()
     raw["TimeToNext"] = (raw["Time"].shift(-1) - raw["Time"]) / 1000000000
 
-    gap_starts = raw.loc[raw["TimeToNext"] >= 0.5].copy()
-    gap_starts["NewPoints"] = gap_starts["TimeToNext"] / 0.5
+    gap_starts = raw.loc[raw["TimeToNext"] >= gap_seconds].copy()
+    gap_starts["NewPoints"] = gap_starts["TimeToNext"] / gap_seconds
     gap_starts["NewPoints"] = gap_starts["NewPoints"].astype(int)
     gap_starts["NewGap"] = gap_starts["TimeToNext"] / (gap_starts["NewPoints"] + 1)
 
