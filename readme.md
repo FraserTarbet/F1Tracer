@@ -2,7 +2,7 @@
 
 This is a simple project, animating F1 telemetry data. Data is sourced from the database created as part of the [F1Dash](https://github.com/FraserTarbet/F1Dash) project.
 
-https://user-images.githubusercontent.com/102040556/188687881-620fdfc6-dd58-48df-a76c-c6a9019186d0.mp4
+https://user-images.githubusercontent.com/102040556/189519518-738d4848-3c03-441e-b056-6cd0a63c909a.mp4
 
 Animation is accomplished using [pyglet](https://pyglet.readthedocs.io/en/latest/index.html).
 
