@@ -134,30 +134,17 @@ def full_lap_follow(session_date, session_name, driver_lap_tcam_tracked_tuples, 
     readout.Readout(readout_frame, (420, 540), animation_manager, batch, group_dict)
 
 
-
-
-# driver_lap_tcam_tracked_tuples = [
-#     (1, 8, False, True),
-#     (55, 10, True, True),
-#     (31, 12, True, False),
-#     (44, 19, True, False),
-#     (11, 8, True, True),
-#     (16, 12, False, True),
-#     (14, 15, False, False),
-#     (63, 7, False, False)
-# ]
-# full_lap_follow("2022-08-27", "Qualifying", driver_lap_tcam_tracked_tuples, "Belgian Grand Prix 2022", "Qualifying Laps", 3, 0)
-
 driver_lap_tcam_tracked_tuples = [
-    (1, 11, False, True),
-    (16, 17, False, True),
-    (55, 17, True, True),
-    (44, 14, True, True),
-    (11, 18, True, False),
+    (16, 12, False, True),
+    (1, 14, False, True),
+    (55, 11, True, True),
+    (11, 14, True, False),
+    (44, 16, True, False),
     (63, 14, False, False),
-    (4, 17, True, False)
+    (4, 18, True, False),
+    (3, 19, False, False)
 ]
-full_lap_follow("2022-09-03", "Qualifying", driver_lap_tcam_tracked_tuples, "Dutch Grand Prix 2022", "Qualifying Laps", 3, 0)
+full_lap_follow("2022-09-10", "Qualifying", driver_lap_tcam_tracked_tuples, "Italian Grand Prix 2022", "Final Qualifying Laps", 3, 0)
 
 
 pyglet.options["vsync"] = False
